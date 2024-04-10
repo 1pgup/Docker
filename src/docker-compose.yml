@@ -1,0 +1,23 @@
+version: '3'
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.fixed
+    networks:
+      - local_network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:8080"
+    volumes:
+      - ./nginx_6.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    networks:
+      - local_network
+
+networks:
+  local_network:
+    driver: bridge

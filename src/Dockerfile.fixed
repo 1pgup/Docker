@@ -1,0 +1,32 @@
+FROM nginx:latest
+
+RUN apt-get update && apt-get install -y gcc libfcgi-dev spawn-fcgi \
+&& rm -rf /var/lib/apt/lists
+
+COPY ./server/server.c /home
+
+RUN gcc -o /home/server.cgi /home/server.c -lfcgi
+
+COPY ./server/nginx/ /etc/nginx
+
+EXPOSE 8080
+
+CMD nginx && spawn-fcgi -p 8080 -n /home/server.cgi
+
+HEALTHCHECK --interval=5m --timeout=3s \
+    CMD curl -f http://localhost/ || exit 1
+
+RUN chmod u-s /usr/bin/newgrp && \
+    chmod u-s /usr/bin/su && \
+    chmod g-s /usr/bin/chage && \
+    chmod g-s /usr/bin/wall && \
+    chmod u-s /usr/bin/passwd && \
+    chmod g-s /usr/sbin/unix_chkpwd && \
+    chmod g-s /usr/bin/expiry && \
+    chmod u-s /usr/bin/gpasswd && \
+    chmod u-s /usr/bin/mount && \
+    chmod u-s /usr/bin/chsh && \
+    chmod u-s /usr/bin/chfn && \
+    chmod u-s /usr/bin/umount
+
+USER nginx
